@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BP Journal</title>
+
+<!-- PWA Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BP Journal">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQlAgSm91cm5hbCIsInNob3J0X25hbWUiOiJCUCBKb3VybmFsIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMxYTFhMmUiLCJ0aGVtZV9jb2xvciI6IiMxYTFhMmUifQ==">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --primary: #3a6ee8;
+  --primary-light: #e8eefb;
+  --primary-dark: #2a54b8;
+  --text: #1a1a2e;
+  --text-secondary: #6b7280;
+  --border: #e2e5ea;
+  --danger: #e74c3c;
+  --danger-light: #fde8e8;
+  --success: #27ae60;
+  --success-light: #e8f8ef;
+  --warning: #f39c12;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(64px + var(--safe-bottom));
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+  overscroll-behavior: none;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--text);
+  color: #fff;
+  padding: 14px 20px;
+  padding-top: calc(14px + var(--safe-top));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.header-sub {
+  font-size: 0.7rem;
+  opacity: 0.55;
+  font-weight: 400;
+  display: block;
+  margin-top: 1px;
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--success);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.badge.show {
+  opacity: 1;
+}
+
+/* Tab Bar */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 0 8px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-btn.active {
+  color: var(--primary);
+}
+
+.tab-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+.tab-btn.active svg {
+  stroke-width: 2.2;
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  animation: fadeIn 0.2s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+/* Form Elements */
+.field {
+  margin-bottom: 14px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="time"],
+input[type="date"],
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.row {
+  display: grid;
+  gap: 12px;
+}
+
+.row-2 { grid-template-columns: 1fr 1fr; }
+.row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* Chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.chip.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+/* Reading Cards */
+.reading-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.reading-card.expanded {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.reading-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  gap: 12px;
+}
+
+.reading-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reading-card.expanded .reading-number {
+  background: var(--primary);
+  color: #fff;
+}
+
+.reading-summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.reading-summary-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.reading-summary-detail {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reading-chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary);
+  transition: transform 0.25s;
+  flex-shrink: 0;
+}
+
+.reading-card.expanded .reading-chevron {
+  transform: rotate(180deg);
+}
+
+.reading-body {
+  display: none;
+  padding: 0 16px 16px;
+}
+
+.reading-card.expanded .reading-body {
+  display: block;
+}
+
+.remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  margin-top: 14px;
+  border: 1.5px dashed var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-light);
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-outline {
+  background: var(--surface);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  background: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.add-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+/* Med Card */
+.med-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.med-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.med-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f0e6ff;
+  color: #7c3aed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.med-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+/* Data Management */
+.data-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.data-section .card-title {
+  margin-bottom: 12px;
+}
+
+.data-btns {
+  display: grid;
+  gap: 10px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+
+.empty-state small {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* Hidden file input */
+#importInput {
+  display: none;
+}
+
+/* Confirm overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.45);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.dialog {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.dialog h3 {
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+}
+
+.dialog p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.dialog-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.dialog-btns .btn {
+  flex: 1;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <h1>BP Journal</h1>
+    <span class="header-sub">Ambulatory Blood Pressure Monitor</span>
+  </div>
+  <span class="badge" id="badge">Saved &#10003;</span>
+</div>
+
+<!-- Tab: Info -->
+<div class="tab-content active" id="tab-info">
+  <div class="card">
+    <div class="card-title">Patient Information</div>
+    <div class="field">
+      <label for="patientName">Patient Name</label>
+      <input type="text" id="patientName" data-field="patientName" placeholder="Full name">
+    </div>
+    <div class="field">
+      <label for="studyDate">Date</label>
+      <input type="date" id="studyDate" data-field="studyDate">
+    </div>
+    <div class="field">
+      <label for="physician">Physician / Contact</label>
+      <input type="text" id="physician" data-field="physician" placeholder="Dr. name or phone">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Sleep Schedule</div>
+    <div class="row row-2">
+      <div class="field">
+        <label for="sleepTime">Went to Sleep</label>
+        <input type="time" id="sleepTime" data-field="sleepTime">
+      </div>
+      <div class="field">
+        <label for="wakeTime">Woke Up</label>
+        <input type="time" id="wakeTime" data-field="wakeTime">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Comments</div>
+    <div class="field">
+      <textarea id="comments" data-field="comments" placeholder="Any additional notes about your day, how you felt, etc." rows="4"></textarea>
+    </div>
+  </div>
+
+  <!-- Data Management -->
+  <div class="card">
+    <div class="card-title">Data Management</div>
+    <div class="data-btns">
+      <button class="btn btn-primary btn-block" onclick="saveNow()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Now
+      </button>
+      <button class="btn btn-success btn-block" onclick="exportBackup()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Backup
+      </button>
+      <button class="btn btn-outline btn-block" onclick="document.getElementById('importInput').click()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import Backup
+      </button>
+      <input type="file" id="importInput" accept=".json" onchange="importBackup(event)">
+      <button class="btn btn-danger btn-block" onclick="showClearConfirm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        Clear All Data
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Tab: Readings -->
+<div class="tab-content" id="tab-readings">
+  <div id="readingsList"></div>
+  <button class="add-btn" onclick="addReading()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Reading
+  </button>
+</div>
+
+<!-- Tab: Meds -->
+<div class="tab-content" id="tab-meds">
+  <div id="medsList"></div>
+  <button class="add-btn" onclick="addMed()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Medication
+  </button>
+</div>
+
+<!-- Tab Bar -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="info" onclick="switchTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Info
+  </button>
+  <button class="tab-btn" data-tab="readings" onclick="switchTab('readings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Readings
+  </button>
+  <button class="tab-btn" data-tab="meds" onclick="switchTab('meds')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+    Meds
+  </button>
+</nav>
+
+<!-- Clear Confirmation Dialog -->
+<div class="overlay" id="clearOverlay">
+  <div class="dialog">
+    <h3>Clear All Data?</h3>
+    <p>This will permanently delete all patient info, readings, and medications. This cannot be undone.</p>
+    <div class="dialog-btns">
+      <button class="btn btn-outline" onclick="hideClearConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="clearAllData()">Delete All</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+const STORAGE_KEY = 'bp-journal-data';
+let state = getDefaultState();
+let autoSaveTimer = null;
+let expandedReading = null;
+
+function getDefaultState() {
+  return {
+    patientName: '',
+    studyDate: '',
+    physician: '',
+    sleepTime: '',
+    wakeTime: '',
+    comments: '',
+    readings: [],
+    meds: []
+  };
+}
+
+// ── Tabs ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+}
+
+// ── Badge ──
+function flashBadge(text) {
+  const badge = document.getElementById('badge');
+  badge.textContent = text;
+  badge.classList.add('show');
+  setTimeout(() => badge.classList.remove('show'), 1800);
+}
+
+// ── Persistence ──
+function saveState() {
+  // Collect info fields
+  document.querySelectorAll('[data-field]').forEach(el => {
+    state[el.dataset.field] = el.value;
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  flashBadge('Saved \u2713');
+}
+
+function saveNow() {
+  collectReadingsState();
+  collectMedsState();
+  saveState();
+}
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const loaded = JSON.parse(raw);
+    state = { ...getDefaultState(), ...loaded };
+    // Fill info fields
+    document.querySelectorAll('[data-field]').forEach(el => {
+      if (state[el.dataset.field] !== undefined) {
+        el.value = state[el.dataset.field];
+      }
+    });
+    renderReadings();
+    renderMeds();
+    flashBadge('Loaded \u2713');
+  } catch (e) {
+    console.error('Failed to load state', e);
+  }
+}
+
+function scheduleAutoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    collectReadingsState();
+    collectMedsState();
+    saveState();
+  }, 1500);
+}
+
+// Listen to input events
+document.addEventListener('input', scheduleAutoSave);
+document.addEventListener('change', scheduleAutoSave);
+
+// ── Readings ──
+function addReading() {
+  state.readings.push({
+    time: '',
+    location: '',
+    activity: '',
+    symptoms: [],
+    notes: ''
+  });
+  expandedReading = state.readings.length - 1;
+  renderReadings();
+  scheduleAutoSave();
+  // Scroll to the new reading
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.reading-card');
+    if (cards.length) cards[cards.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
+}
+
+function removeReading(index) {
+  state.readings.splice(index, 1);
+  if (expandedReading === index) expandedReading = null;
+  else if (expandedReading > index) expandedReading--;
+  renderReadings();
+  scheduleAutoSave();
+}
+
+function toggleReading(index) {
+  expandedReading = expandedReading === index ? null : index;
+  renderReadings();
+}
+
+function collectReadingsState() {
+  document.querySelectorAll('.reading-card').forEach((card, i) => {
+    if (!state.readings[i]) return;
+    const timeInput = card.querySelector('.r-time');
+    const notesInput = card.querySelector('.r-notes');
+    if (timeInput) state.readings[i].time = timeInput.value;
+    if (notesInput) state.readings[i].notes = notesInput.value;
+  });
+}
+
+function setReadingChip(readingIndex, field, value) {
+  if (!state.readings[readingIndex]) return;
+
+  if (field === 'symptoms') {
+    const symp = state.readings[readingIndex].symptoms;
+    if (value === 'None') {
+      state.readings[readingIndex].symptoms = ['None'];
+    } else {
+      const filtered = symp.filter(s => s !== 'None');
+      const idx = filtered.indexOf(value);
+      if (idx >= 0) filtered.splice(idx, 1);
+      else filtered.push(value);
+      state.readings[readingIndex].symptoms = filtered.length === 0 ? [] : filtered;
+    }
+  } else {
+    state.readings[readingIndex][field] = state.readings[readingIndex][field] === value ? '' : value;
+  }
+  renderReadings();
+  scheduleAutoSave();
+}
+
+function renderReadings() {
+  const container = document.getElementById('readingsList');
+  if (state.readings.length === 0) {
+    container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><p>No readings yet</p><small>Tap "Add Reading" to log a blood pressure event</small></div>';
+    return;
+  }
+
+  const locations = ['Home', 'Work', 'Other'];
+  const activities = ['Sitting', 'Standing', 'Lying Down', 'Talking', 'Relaxing', 'Eating', 'Walking', 'Driving', 'Feeling Stressed', 'Other'];
+  const symptomOptions = ['None', 'Headache', 'Dizziness', 'Heart Flutters', 'Other'];
+
+  container.innerHTML = state.readings.map((r, i) => {
+    const isExp = expandedReading === i;
+    const summaryParts = [];
+    if (r.time) summaryParts.push(formatTime12(r.time));
+    if (r.location) summaryParts.push(r.location);
+    if (r.activity) summaryParts.push(r.activity);
+
+    return '<div class="reading-card' + (isExp ? ' expanded' : '') + '">' +
+      '<div class="reading-header" onclick="toggleReading(' + i + ')">' +
+        '<div class="reading-number">' + (i + 1) + '</div>' +
+        '<div class="reading-summary">' +
+          '<div class="reading-summary-title">Reading #' + (i + 1) + '</div>' +
+          '<div class="reading-summary-detail">' + (summaryParts.length ? summaryParts.join(' &middot; ') : 'Tap to expand') + '</div>' +
+        '</div>' +
+        '<svg class="reading-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</div>' +
+      (isExp ? '<div class="reading-body">' +
+        '<div class="field"><label>Time</label><input type="time" class="r-time" value="' + esc(r.time) + '" onchange="state.readings[' + i + '].time=this.value;renderReadings();scheduleAutoSave()"></div>' +
+        '<div class="field"><label>Location</label><div class="chips">' +
+          locations.map(l => '<button type="button" class="chip' + (r.location === l ? ' selected' : '') + '" onclick="setReadingChip(' + i + ',\'location\',\'' + l + '\')">' + l + '</button>').join('') +
+        '</div></div>' +
+        '<div class="field"><label>Activity</label><div class="chips">' +
+          activities.map(a => '<button type="button" class="chip' + (r.activity === a ? ' selected' : '') + '" onclick="setReadingChip(' + i + ',\'activity\',\'' + esc(a) + '\')">' + a + '</button>').join('') +
+        '</div></div>' +
+        '<div class="field"><label>Symptoms</label><div class="chips">' +
+          symptomOptions.map(s => '<button type="button" class="chip' + (r.symptoms.includes(s) ? ' selected' : '') + '" onclick="setReadingChip(' + i + ',\'symptoms\',\'' + esc(s) + '\')">' + s + '</button>').join('') +
+        '</div></div>' +
+        '<div class="field"><label>Notes</label><textarea class="r-notes" rows="2" placeholder="Optional notes for this reading">' + esc(r.notes) + '</textarea></div>' +
+        '<button type="button" class="remove-btn" onclick="removeReading(' + i + ')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Remove Reading</button>' +
+      '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+// ── Meds ──
+function addMed() {
+  state.meds.push({ name: '', time: '', dose: '' });
+  renderMeds();
+  scheduleAutoSave();
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.med-card');
+    if (cards.length) cards[cards.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
+}
+
+function removeMed(index) {
+  state.meds.splice(index, 1);
+  renderMeds();
+  scheduleAutoSave();
+}
+
+function collectMedsState() {
+  document.querySelectorAll('.med-card').forEach((card, i) => {
+    if (!state.meds[i]) return;
+    const nameEl = card.querySelector('.m-name');
+    const timeEl = card.querySelector('.m-time');
+    const doseEl = card.querySelector('.m-dose');
+    if (nameEl) state.meds[i].name = nameEl.value;
+    if (timeEl) state.meds[i].time = timeEl.value;
+    if (doseEl) state.meds[i].dose = doseEl.value;
+  });
+}
+
+function renderMeds() {
+  const container = document.getElementById('medsList');
+  if (state.meds.length === 0) {
+    container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 3v18"/></svg><p>No medications yet</p><small>Tap "Add Medication" to log a med</small></div>';
+    return;
+  }
+
+  container.innerHTML = state.meds.map((m, i) => {
+    return '<div class="med-card">' +
+      '<div class="med-card-header">' +
+        '<div class="med-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-6 9h6m-3-3v6"/></svg></div>' +
+        '<div class="med-card-title">Medication #' + (i + 1) + '</div>' +
+      '</div>' +
+      '<div class="field"><label>Name</label><input type="text" class="m-name" value="' + esc(m.name) + '" placeholder="Medication name"></div>' +
+      '<div class="row row-2">' +
+        '<div class="field"><label>Time Taken</label><input type="time" class="m-time" value="' + esc(m.time) + '"></div>' +
+        '<div class="field"><label>Dose</label><input type="text" class="m-dose" value="' + esc(m.dose) + '" placeholder="e.g. 50mg"></div>' +
+      '</div>' +
+      '<button type="button" class="remove-btn" onclick="removeMed(' + i + ')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Remove Medication</button>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Export / Import / Clear ──
+function exportBackup() {
+  collectReadingsState();
+  collectMedsState();
+  // Collect info fields
+  document.querySelectorAll('[data-field]').forEach(el => {
+    state[el.dataset.field] = el.value;
+  });
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const name = state.patientName ? state.patientName.replace(/\s+/g, '_') : 'bp-journal';
+  const date = state.studyDate || new Date().toISOString().slice(0, 10);
+  a.download = name + '_' + date + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      state = { ...getDefaultState(), ...imported };
+      // Ensure arrays
+      if (!Array.isArray(state.readings)) state.readings = [];
+      if (!Array.isArray(state.meds)) state.meds = [];
+      // Fill info fields
+      document.querySelectorAll('[data-field]').forEach(el => {
+        if (state[el.dataset.field] !== undefined) el.value = state[el.dataset.field];
+      });
+      renderReadings();
+      renderMeds();
+      saveState();
+      flashBadge('Imported \u2713');
+    } catch (err) {
+      alert('Invalid backup file.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function showClearConfirm() {
+  document.getElementById('clearOverlay').classList.add('show');
+}
+
+function hideClearConfirm() {
+  document.getElementById('clearOverlay').classList.remove('show');
+}
+
+function clearAllData() {
+  localStorage.removeItem(STORAGE_KEY);
+  state = getDefaultState();
+  document.querySelectorAll('[data-field]').forEach(el => el.value = '');
+  expandedReading = null;
+  renderReadings();
+  renderMeds();
+  hideClearConfirm();
+  flashBadge('Cleared \u2713');
+}
+
+// ── Helpers ──
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatTime12(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  // If no readings/meds rendered yet (fresh state), render empty states
+  if (state.readings.length === 0) renderReadings();
+  if (state.meds.length === 0) renderMeds();
+});
+</script>
+</body>
+</html>
