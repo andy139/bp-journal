@@ -601,8 +601,18 @@ textarea {
       <input type="date" id="studyDate" data-field="studyDate">
     </div>
     <div class="field">
-      <label for="physician">Physician / Contact</label>
-      <input type="text" id="physician" data-field="physician" placeholder="Dr. name or phone">
+      <label for="physicianName">Physician / Provider</label>
+      <input type="text" id="physicianName" data-field="physicianName" placeholder="Dr. name">
+    </div>
+    <div class="row row-2">
+      <div class="field">
+        <label for="physicianPhone">Phone</label>
+        <input type="text" id="physicianPhone" data-field="physicianPhone" placeholder="(555) 555-5555">
+      </div>
+      <div class="field">
+        <label for="physicianEmail">Email</label>
+        <input type="text" id="physicianEmail" data-field="physicianEmail" placeholder="dr@clinic.com">
+      </div>
     </div>
   </div>
 
@@ -644,6 +654,14 @@ textarea {
         Import Backup
       </button>
       <input type="file" id="importInput" accept=".json" onchange="importBackup(event)">
+      <button class="btn btn-outline btn-block" onclick="printReport()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print / Save PDF
+      </button>
+      <button class="btn btn-outline btn-block" onclick="shareWithProvider()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Share with Provider
+      </button>
       <button class="btn btn-danger btn-block" onclick="showClearConfirm()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
         Clear All Data
@@ -710,6 +728,9 @@ function getDefaultState() {
     patientName: '',
     studyDate: '',
     physician: '',
+    physicianName: '',
+    physicianPhone: '',
+    physicianEmail: '',
     sleepTime: '',
     wakeTime: '',
     comments: '',
@@ -717,6 +738,40 @@ function getDefaultState() {
     meds: []
   };
 }
+
+const INITIAL_DATA = {
+  patientName: 'andy tran',
+  studyDate: '2026-03-31',
+  physician: '',
+  physicianName: '',
+  physicianPhone: '',
+  physicianEmail: '',
+  sleepTime: '00:58',
+  wakeTime: '09:01',
+  comments: 'Around 8:30 PM the hose fell off the machine while I was in a game of League of Legends.',
+  readings: [
+    { time: '11:00', location: 'Home', activity: 'Feeling Stressed', symptoms: ['None'], notes: '' },
+    { time: '11:30', location: 'Home', activity: 'Sitting', symptoms: [], notes: '' },
+    { time: '12:00', location: 'Home', activity: 'Sitting', symptoms: [], notes: '' },
+    { time: '12:30', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '13:00', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '13:30', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '14:00', location: 'Home', activity: 'Sitting', symptoms: [], notes: '' },
+    { time: '14:30', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '15:00', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '15:30', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '16:00', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '16:30', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '17:00', location: 'Home', activity: 'Sitting', symptoms: ['None'], notes: '' },
+    { time: '17:30', location: 'Home', activity: 'Talking', symptoms: ['None'], notes: 'On Voice Chat at home with friends playing video games' },
+    { time: '18:00', location: 'Home', activity: 'Talking', symptoms: ['None'], notes: 'Vc with friends' },
+    { time: '18:30', location: 'Home', activity: 'Talking', symptoms: [], notes: 'vc w friends' },
+    { time: '19:00', location: 'Home', activity: 'Talking', symptoms: ['None'], notes: 'Intense game of League of Legends' },
+    { time: '19:30', location: 'Home', activity: 'Talking', symptoms: ['None'], notes: 'Intense game of league of legends' },
+    { time: '20:01', location: 'Home', activity: 'Talking', symptoms: ['None'], notes: '' }
+  ],
+  meds: []
+};
 
 // ── Tabs ──
 function switchTab(tab) {
@@ -752,11 +807,15 @@ function saveNow() {
 
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
+  const source = raw ? JSON.parse(raw) : INITIAL_DATA;
   try {
-    const loaded = JSON.parse(raw);
-    state = { ...getDefaultState(), ...loaded };
-    // Fill info fields
+    state = { ...getDefaultState(), ...source };
+    // Migrate old single physician field to physicianName
+    if (state.physician && !state.physicianName) {
+      state.physicianName = state.physician;
+    }
+    if (!Array.isArray(state.readings)) state.readings = [];
+    if (!Array.isArray(state.meds)) state.meds = [];
     document.querySelectorAll('[data-field]').forEach(el => {
       if (state[el.dataset.field] !== undefined) {
         el.value = state[el.dataset.field];
@@ -764,7 +823,8 @@ function loadState() {
     });
     renderReadings();
     renderMeds();
-    flashBadge('Loaded \u2713');
+    if (raw) flashBadge('Loaded \u2713');
+    else saveState();
   } catch (e) {
     console.error('Failed to load state', e);
   }
@@ -1022,6 +1082,98 @@ function formatTime12(timeStr) {
   const ampm = h >= 12 ? 'PM' : 'AM';
   const h12 = h % 12 || 12;
   return h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+}
+
+// ── Print / Share ──
+function collectAll() {
+  collectReadingsState();
+  collectMedsState();
+  document.querySelectorAll('[data-field]').forEach(el => {
+    state[el.dataset.field] = el.value;
+  });
+}
+
+function printReport() {
+  collectAll();
+  const win = window.open('', '_blank');
+  if (!win) { alert('Please allow popups to print.'); return; }
+  win.document.write(generatePrintHTML());
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 400);
+}
+
+function generatePrintHTML() {
+  const provider = state.physicianName || state.physician || '';
+  const readingsHTML = state.readings.filter(r => r.time || r.activity).map((r, i) => {
+    const symp = r.symptoms.filter(s => s).join(', ') || '—';
+    return '<tr><td>' + (i + 1) + '</td><td>' + esc(formatTime12(r.time) || '—') + '</td><td>' + esc(r.location || '—') + '</td><td>' + esc(r.activity || '—') + '</td><td>' + esc(symp) + '</td><td>' + esc(r.notes || '—') + '</td></tr>';
+  }).join('');
+  const medsHTML = state.meds.filter(m => m.name).map(m =>
+    '<tr><td>' + esc(m.name) + '</td><td>' + esc(formatTime12(m.time) || '—') + '</td><td>' + esc(m.dose || '—') + '</td></tr>'
+  ).join('');
+
+  return '<!DOCTYPE html><html><head><title>BP Journal \u2013 ' + esc(state.patientName || 'Report') + '</title><style>' +
+    'body{font-family:Arial,sans-serif;font-size:12px;color:#000;margin:0;padding:24px}' +
+    'h1{font-size:20px;margin:0 0 2px}' +
+    '.sub{font-size:11px;color:#666;margin-bottom:20px}' +
+    'h2{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#555;border-bottom:1px solid #ddd;padding-bottom:4px;margin:18px 0 10px}' +
+    '.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 16px;margin-bottom:4px}' +
+    '.item label{font-size:9px;text-transform:uppercase;color:#999;display:block}' +
+    '.item span{font-size:13px;font-weight:600}' +
+    'table{width:100%;border-collapse:collapse;font-size:11px}' +
+    'th{text-align:left;padding:5px 7px;background:#f0f0f0;font-size:9px;text-transform:uppercase;border:1px solid #ddd}' +
+    'td{padding:5px 7px;border:1px solid #ddd;vertical-align:top}' +
+    'tr:nth-child(even) td{background:#fafafa}' +
+    '.comments{background:#f8f8f8;padding:10px;border:1px solid #eee;font-size:12px;white-space:pre-wrap}' +
+    '.footer{margin-top:28px;font-size:9px;color:#bbb;text-align:center}' +
+    '@media print{body{padding:12px}}' +
+  '</style></head><body>' +
+  '<h1>Ambulatory Blood Pressure Journal</h1>' +
+  '<p class="sub">Generated ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + '</p>' +
+  '<h2>Patient Information</h2>' +
+  '<div class="grid">' +
+    '<div class="item"><label>Patient</label><span>' + esc(state.patientName || '—') + '</span></div>' +
+    '<div class="item"><label>Study Date</label><span>' + esc(state.studyDate || '—') + '</span></div>' +
+    '<div class="item"><label>Sleep</label><span>' + esc(formatTime12(state.sleepTime) || '—') + ' \u2192 ' + esc(formatTime12(state.wakeTime) || '—') + '</span></div>' +
+    (provider ? '<div class="item"><label>Physician</label><span>' + esc(provider) + '</span></div>' : '') +
+    (state.physicianPhone ? '<div class="item"><label>Provider Phone</label><span>' + esc(state.physicianPhone) + '</span></div>' : '') +
+    (state.physicianEmail ? '<div class="item"><label>Provider Email</label><span>' + esc(state.physicianEmail) + '</span></div>' : '') +
+  '</div>' +
+  (state.comments ? '<h2>Comments</h2><div class="comments">' + esc(state.comments) + '</div>' : '') +
+  '<h2>Readings (' + state.readings.filter(r => r.time || r.activity).length + ')</h2>' +
+  (readingsHTML
+    ? '<table><thead><tr><th>#</th><th>Time</th><th>Location</th><th>Activity</th><th>Symptoms</th><th>Notes</th></tr></thead><tbody>' + readingsHTML + '</tbody></table>'
+    : '<p>No readings recorded.</p>') +
+  (medsHTML
+    ? '<h2>Medications</h2><table><thead><tr><th>Name</th><th>Time</th><th>Dose</th></tr></thead><tbody>' + medsHTML + '</tbody></table>'
+    : '') +
+  '<div class="footer">BP Journal &bull; Ambulatory Blood Pressure Monitor &bull; ' + new Date().toLocaleDateString() + '</div>' +
+  '</body></html>';
+}
+
+function shareWithProvider() {
+  collectAll();
+  const email = state.physicianEmail || '';
+  const subject = 'BP Journal \u2013 ' + (state.patientName || 'Patient') + ' \u2013 ' + (state.studyDate || new Date().toISOString().slice(0, 10));
+  const readingLines = state.readings.filter(r => r.time || r.activity).map((r, i) => {
+    const symp = r.symptoms.filter(s => s).join(', ') || 'None';
+    return (i + 1) + '. ' + (formatTime12(r.time) || '—') + ' | ' + (r.location || '—') + ' | ' + (r.activity || '—') + ' | Symptoms: ' + symp + (r.notes ? ' | ' + r.notes : '');
+  }).join('\n');
+  const medLines = state.meds.filter(m => m.name).map(m =>
+    '\u2022 ' + m.name + (m.dose ? ' ' + m.dose : '') + (m.time ? ' at ' + formatTime12(m.time) : '')
+  ).join('\n');
+  const provider = state.physicianName || state.physician || '';
+  const body = (provider ? 'Dear ' + provider + ',\n\n' : '') +
+    'Please find my BP journal attached below.\n\n' +
+    'PATIENT: ' + (state.patientName || '—') + '\n' +
+    'DATE: ' + (state.studyDate || '—') + '\n' +
+    'SLEEP: ' + (formatTime12(state.sleepTime) || '—') + ' \u2192 ' + (formatTime12(state.wakeTime) || '—') + '\n\n' +
+    'READINGS:\n' + (readingLines || 'No readings.') + '\n\n' +
+    (medLines ? 'MEDICATIONS:\n' + medLines + '\n\n' : '') +
+    (state.comments ? 'COMMENTS:\n' + state.comments + '\n\n' : '') +
+    '---\nSent from BP Journal';
+  window.open('mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body));
 }
 
 // ── Init ──
