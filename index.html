@@ -525,6 +525,58 @@ textarea {
   opacity: 0.7;
 }
 
+/* How To Use Card */
+.how-to-card {
+  background: var(--primary-light);
+  border: 1.5px solid #c5d6f7;
+}
+
+.how-to-card .card-title {
+  color: var(--primary);
+}
+
+.how-to-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.how-to-list li {
+  font-size: 0.83rem;
+  color: var(--text);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.45;
+}
+
+.how-to-list li span.icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.storage-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: #f8f9fc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.storage-note svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--primary);
+}
+
 /* Hidden file input */
 #importInput {
   display: none;
@@ -590,6 +642,20 @@ textarea {
 
 <!-- Tab: Info -->
 <div class="tab-content active" id="tab-info">
+
+  <!-- How to Use -->
+  <div class="card how-to-card">
+    <div class="card-title">How to Use</div>
+    <ul class="how-to-list">
+      <li><span class="icon">📋</span><span><strong>Info tab</strong> — Fill in your name, study date, provider details, sleep times, and any general comments about your day.</span></li>
+      <li><span class="icon">📈</span><span><strong>Readings tab</strong> — Log each blood pressure check with the time, location, activity, symptoms, and optional notes. Tap a reading to expand it.</span></li>
+      <li><span class="icon">💊</span><span><strong>Meds tab</strong> — Log any medications you took during the monitoring period.</span></li>
+      <li><span class="icon">💾</span><span><strong>Auto-save</strong> — Your data saves automatically as you type. No need to tap "Save Now" manually.</span></li>
+      <li><span class="icon">🖨️</span><span><strong>Print / Save PDF</strong> — Generates a clean formatted report you can print or save as a PDF to share with your doctor.</span></li>
+      <li><span class="icon">📧</span><span><strong>Share with Provider</strong> — Opens your email app pre-filled with a full summary. Add your provider's email in the fields above first.</span></li>
+    </ul>
+  </div>
+
   <div class="card">
     <div class="card-title">Patient Information</div>
     <div class="field">
@@ -640,6 +706,10 @@ textarea {
   <!-- Data Management -->
   <div class="card">
     <div class="card-title">Data Management</div>
+    <div class="storage-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Your data is saved in your browser and will persist between visits. Clearing your browser data or tapping <strong>"Clear All Data"</strong> will reset the app to sample data.</span>
+    </div>
     <div class="data-btns">
       <button class="btn btn-primary btn-block" onclick="saveNow()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -740,51 +810,32 @@ function getDefaultState() {
 }
 
 const INITIAL_DATA = {
-  patientName: 'Andy Tran',
-  studyDate: '2026-03-31',
+  patientName: 'Jane Doe',
+  studyDate: '2024-06-15',
   physician: '',
-  physicianName: '',
-  physicianPhone: '',
-  physicianEmail: '',
-  sleepTime: '00:58',
-  wakeTime: '09:01',
-  comments: "Around 8:30 PM the hose fell off the machine while I was in a game of League of Legends and I wasn't able to put it back on until 8:50 PM.",
+  physicianName: 'Dr. Smith',
+  physicianPhone: '(555) 867-5309',
+  physicianEmail: 'dr.smith@heartcare.com',
+  sleepTime: '23:00',
+  wakeTime: '07:30',
+  comments: 'Sample data — replace this with your own information. Felt slightly tired in the afternoon but otherwise a normal day.',
   readings: [
-    { time: '11:00', location: 'Home', activity: 'Feeling Stressed', symptoms: ['None'], notes: '' },
-    { time: '11:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '12:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '12:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '13:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '13:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '14:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '14:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '15:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '15:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '16:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '16:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '17:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '17:30', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: 'On voice chat at home with friends playing video games.' },
-    { time: '18:00', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: 'On voice chat with friends.' },
-    { time: '18:30', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: 'On voice chat with friends.' },
-    { time: '19:00', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: 'Intense game of League of Legends.' },
-    { time: '19:30', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: 'Intense game of League of Legends.' },
-    { time: '20:01', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: '' },
-    { time: '20:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '21:00', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: '' },
-    { time: '21:30', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: '' },
-    { time: '22:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '22:30', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: '' },
-    { time: '23:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '23:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '00:01', location: 'Home', activity: 'Talking',          symptoms: ['None'], notes: '' },
-    { time: '00:30', location: 'Home', activity: 'Lying Down',       symptoms: ['None'], notes: 'Started sleeping.' },
-    { time: '09:01', location: 'Home', activity: 'Standing',         symptoms: ['None'], notes: '' },
-    { time: '09:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '10:00', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' },
-    { time: '10:30', location: 'Home', activity: 'Sitting',          symptoms: ['None'], notes: '' }
+    { time: '08:00', location: 'Home',  activity: 'Standing',       symptoms: ['None'],    notes: 'Just woke up.' },
+    { time: '09:00', location: 'Home',  activity: 'Sitting',        symptoms: ['None'],    notes: '' },
+    { time: '10:00', location: 'Home',  activity: 'Sitting',        symptoms: ['None'],    notes: '' },
+    { time: '11:00', location: 'Work',  activity: 'Sitting',        symptoms: ['None'],    notes: 'At desk.' },
+    { time: '12:00', location: 'Work',  activity: 'Eating',         symptoms: ['None'],    notes: 'Lunch break.' },
+    { time: '13:00', location: 'Work',  activity: 'Sitting',        symptoms: ['None'],    notes: '' },
+    { time: '14:00', location: 'Work',  activity: 'Feeling Stressed', symptoms: ['Headache'], notes: 'Stressful meeting.' },
+    { time: '15:00', location: 'Work',  activity: 'Sitting',        symptoms: ['None'],    notes: '' },
+    { time: '16:00', location: 'Home',  activity: 'Walking',        symptoms: ['None'],    notes: 'Short walk after work.' },
+    { time: '17:00', location: 'Home',  activity: 'Relaxing',       symptoms: ['None'],    notes: '' },
+    { time: '18:00', location: 'Home',  activity: 'Eating',         symptoms: ['None'],    notes: 'Dinner.' },
+    { time: '19:00', location: 'Home',  activity: 'Sitting',        symptoms: ['None'],    notes: '' },
+    { time: '21:00', location: 'Home',  activity: 'Lying Down',     symptoms: ['None'],    notes: 'Winding down for bed.' }
   ],
   meds: [
-    { name: 'Vyvanse', time: '10:00', dose: '40mg' }
+    { name: 'Lisinopril', time: '08:00', dose: '10mg' }
   ]
 };
 
